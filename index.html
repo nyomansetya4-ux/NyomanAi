@@ -1,0 +1,234 @@
+```html
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nyoman AI Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            slate: { 850: '#1e293b', 950: '#020617' }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex transition-colors duration-300" id="body-theme">
+
+  <div id="toast" class="hidden fixed top-4 right-4 z-50 flex items-center p-4 rounded-xl shadow-2xl border transition-all duration-300">
+    <span id="toast-message" class="font-medium"></span>
+  </div>
+
+  <aside id="sidebar" class="fixed lg:static top-0 bottom-0 left-0 z-40 w-72 flex flex-col border-r bg-slate-900 border-slate-800 transition-transform duration-300 -translate-x-full lg:transform-none">
+    <div class="p-6 border-b border-slate-800 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
+          <span class="text-white font-black text-xl">N</span>
+        </div>
+        <div>
+          <h1 class="font-extrabold text-lg tracking-wider bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">NYOMAN AI</h1>
+          <p class="text-xs text-slate-400 font-medium">Asisten Pribadi Anda</p>
+        </div>
+      </div>
+      <button onclick="toggleSidebar(false)" class="lg:hidden p-2 rounded-lg hover:bg-slate-800">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
+    </div>
+
+    <div class="flex-1 p-4 space-y-2 overflow-y-auto">
+      <p class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Fitur Nyoman AI</p>
+      <button onclick="switchTab('chat')" id="btn-chat" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition-all bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg">
+        <span>Obrolan & Analisis</span>
+      </button>
+      <button onclick="switchTab('image')" id="btn-image" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition-all text-slate-400 hover:bg-slate-800/50">
+        <span>Kreator Gambar</span>
+      </button>
+      <button onclick="switchTab('voice')" id="btn-voice" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition-all text-slate-400 hover:bg-slate-800/50">
+        <span>Studio Suara</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="flex-1 flex flex-col h-screen overflow-hidden">
+    <header class="p-4 flex items-center justify-between border-b bg-slate-900/40 border-slate-800 lg:px-8">
+      <div class="flex items-center space-x-4">
+        <button onclick="toggleSidebar(true)" class="lg:hidden p-2 rounded-xl hover:bg-amber-500/10 text-amber-500">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+        </button>
+        <h2 id="header-title" class="text-xl font-black tracking-tight">Nyoman Chat & Vision</h2>
+      </div>
+    </header>
+
+    <section class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 flex flex-col justify-between">
+      
+      <div id="tab-chat" class="flex-1 flex flex-col max-w-4xl mx-auto w-full">
+        <div id="chat-box" class="flex-1 space-y-6 overflow-y-auto pr-2 mb-4 h-[60vh]">
+          <div class="flex justify-start">
+            <div class="max-w-[85%] rounded-2xl p-4 shadow-sm bg-slate-900 border border-slate-800 rounded-tl-none">
+              <p class="text-sm">Halo! Saya Nyoman AI, asisten pintar pribadi Anda. Ada yang bisa Nyoman bantu hari ini?</p>
+            </div>
+          </div>
+        </div>
+        
+        <form id="chat-form" onsubmit="handleSendMessage(event)" class="p-4 rounded-2xl border bg-slate-900/90 border-slate-800 flex items-center space-x-3">
+          <input type="text" id="chat-input" placeholder="Tanyakan sesuatu pada Nyoman..." class="flex-1 bg-transparent focus:outline-none text-sm placeholder-slate-400 py-2">
+          <button type="submit" class="p-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg">Kirim</button>
+        </form>
+      </div>
+
+      <div id="tab-image" class="hidden flex-1 max-w-4xl mx-auto w-full flex flex-col md:flex-row gap-6">
+        <div class="flex-1 space-y-6">
+          <textarea id="image-prompt" placeholder="Gambarkan lukisan impian Anda (Gunakan Bahasa Inggris)..." rows="4" class="w-full p-4 rounded-2xl border bg-slate-900 border-slate-800 text-sm focus:outline-none"></textarea>
+          <button onclick="handleGenerateImage()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold shadow-lg">Mulai Lukis</button>
+        </div>
+        <div id="image-result" class="flex-1 flex items-center justify-center p-6 rounded-3xl border-2 border-dashed border-slate-800 bg-slate-900/20">
+          <p class="text-sm text-slate-400 text-center">Belum ada gambar yang dilukis.</p>
+        </div>
+      </div>
+
+      <div id="tab-voice" class="hidden flex-1 max-w-3xl mx-auto w-full space-y-6">
+        <div class="p-6 rounded-2xl border bg-slate-900 border-slate-800 space-y-4">
+          <textarea id="voice-text" placeholder="Masukkan kalimat yang ingin disuarakan..." rows="3" class="w-full p-4 rounded-xl border bg-slate-850 border-slate-750 text-sm focus:outline-none"></textarea>
+          <button onclick="handleGenerateVoice()" class="w-full py-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold">Ubah ke Suara</button>
+        </div>
+        <div id="audio-result" class="p-6 rounded-2xl border-2 border-dashed border-slate-800 bg-slate-900/20 text-center text-sm text-slate-400">
+          Belum ada audio yang diproses.
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <script>
+    // MASUKKAN API KEY GEMINI KAMU DI SINI LANGSUNG JIKA TIDAK PAKAI ENVIRONMENT VARIABLES VERCEL
+    const apiKey = "GANTI_DENGAN_API_KEY_GEMINI_KAMU"; 
+
+    let currentTab = 'chat';
+
+    function toggleSidebar(open) {
+      const sidebar = document.getElementById('sidebar');
+      if (open) sidebar.classList.remove('-translate-x-full');
+      else sidebar.classList.add('-translate-x-full');
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.getElementById('tab-chat').classList.add('hidden');
+      document.getElementById('tab-image').classList.add('hidden');
+      document.getElementById('tab-voice').classList.add('hidden');
+      
+      document.getElementById(`tab-${tab}`).classList.remove('hidden');
+      
+      // Reset Style Tombol Menu
+      ['chat', 'image', 'voice'].forEach(t => {
+        const btn = document.getElementById(`btn-${t}`);
+        btn.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition-all text-slate-400 hover:bg-slate-800/50";
+      });
+      // Set Aktif Tombol Menu
+      document.getElementById(`btn-${tab}`).className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition-all bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg";
+      
+      const titles = { chat: 'Nyoman Chat & Vision', image: 'Nyoman Gambar Artistik', voice: 'Nyoman Studio Percakapan' };
+      document.getElementById('header-title').innerText = titles[tab];
+      toggleSidebar(false);
+    }
+
+    function showToast(msg, type = 'info') {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-message');
+      toastMsg.innerText = msg;
+      toast.className = `fixed top-4 right-4 z-50 flex items-center p-4 rounded-xl shadow-2xl border transition-all duration-300 ${
+        type === 'error' ? 'bg-red-900/90 text-red-100 border-red-700' : 'bg-indigo-900/90 text-indigo-100 border-indigo-700'
+      }`;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 3000);
+    }
+
+    // LOGIKA CHAT GEMINI 2.5 FLASH
+    async function handleSendMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const chatBox = document.getElementById('chat-box');
+      chatBox.innerHTML += `<div class="flex justify-end"><div class="max-w-[85%] rounded-2xl p-4 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-tr-none text-sm">${text}</div></div>`;
+      input.value = '';
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ roles: "user", parts: [{ text: text }] }],
+            systemInstruction: { parts: [{ text: "Anda adalah Nyoman AI, asisten yang ramah, asyik, dan membantu. Selalu panggil diri Anda 'Nyoman'." }] }
+          })
+        });
+        const data = await res.json();
+        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Aduh, Nyoman bingung nih.";
+        
+        chatBox.innerHTML += `<div class="flex justify-start"><div class="max-w-[85%] rounded-2xl p-4 bg-slate-900 border border-slate-800 rounded-tl-none text-sm">${reply}</div></div>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+      } catch (err) {
+        showToast("Gagal tersambung ke Nyoman AI", "error");
+      }
+    }
+
+    // LOGIKA IMAGEN 4 IMAGES
+    async function handleGenerateImage() {
+      const prompt = document.getElementById('image-prompt').value.trim();
+      if (!prompt) return;
+      const resArea = document.getElementById('image-result');
+      resArea.innerHTML = '<p class="text-sm text-slate-400">Nyoman sedang melukis...</p>';
+
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ instances: [{ prompt: prompt }], parameters: { sampleCount: 1, aspectRatio: "1:1", outputMimeType: "image/png" } })
+        });
+        const data = await res.json();
+        const base64 = data.predictions?.[0]?.bytesBase64Encoded;
+        if (base64) {
+          resArea.innerHTML = `<img src="data:image/png;base64,${base64}" class="w-full rounded-2xl shadow-2xl">`;
+        } else { throw new Error(); }
+      } catch (err) {
+        resArea.innerHTML = '<p class="text-sm text-red-400">Gagal melukis gambar.</p>';
+      }
+    }
+
+    // LOGIKA TTS AUDIO VOICE
+    async function handleGenerateVoice() {
+      const text = document.getElementById('voice-text').value.trim();
+      if (!text) return;
+      const resArea = document.getElementById('audio-result');
+      resArea.innerHTML = 'Nyoman sedang memproses suara...';
+
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: text }] }],
+            generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } } }
+          })
+        });
+        const data = await res.json();
+        const pcmBase64 = data.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+        if (pcmBase64) {
+          resArea.innerHTML = `<audio src="data:audio/wav;base64,${pcmBase64}" controls class="w-full" autoplay></audio>`;
+        } else { throw new Error(); }
+      } catch (err) {
+        resArea.innerHTML = 'Gagal memproses suara Nyoman.';
+      }
+    }
+  </script>
+</body>
+</html>
+
+```
